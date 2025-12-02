@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 30px 0;
+            background: white;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .invoice-wrapper {
+            background: white;
+            padding: 50px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .invoice-title-section {
+            margin-bottom: 30px;
+        }
+
+        .invoice-title {
+            font-size: 32px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .invoice-meta-top {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            font-size: 14px;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .meta-item label {
+            font-weight: 600;
+            color: #666;
+            min-width: 120px;
+        }
+
+        .meta-item input {
+            flex: 1;
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .parties {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .party-title {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #999;
+            margin-bottom: 15px;
+            letter-spacing: 0.5px;
+        }
+
+        .party textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 120px;
+            line-height: 1.6;
+        }
+
+        .payment-details {
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+
+        .payment-details-title {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #666;
+            margin-bottom: 15px;
+            letter-spacing: 0.5px;
+        }
+
+        .payment-field {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .payment-field label {
+            font-weight: 600;
+            color: #333;
+            min-width: 150px;
+        }
+
+        .payment-field input {
+            flex: 1;
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .items-section {
+            margin-bottom: 30px;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .items-table thead {
+            background: #445566;
+            color: white;
+        }
+
+        .items-table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .items-table th:last-child {
+            text-align: right;
+        }
+
+        .items-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .items-table input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .items-table .hours-input,
+        .items-table .rate-input {
+            width: 100px;
+        }
+
+        .items-table .total-cell {
+            text-align: right;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .add-item-btn,
+        .remove-item-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+
+        .add-item-btn {
+            background: #3498db;
+            color: white;
+        }
+
+        .add-item-btn:hover {
+            background: #2980b9;
+        }
+
+        .remove-item-btn {
+            background: #e74c3c;
+            color: white;
+            padding: 4px 12px;
+            font-size: 16px;
+        }
+
+        .remove-item-btn:hover {
+            background: #c0392b;
+        }
+
+        .totals {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+        }
+
+        .totals-inner {
+            width: 350px;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            font-size: 15px;
+        }
+
+        .total-row.subtotal {
+            border-bottom: 1px solid #ddd;
+            color: #666;
+        }
+
+        .total-row.grand-total {
+            font-size: 22px;
+            font-weight: 700;
+            color: #2c3e50;
+            padding-top: 15px;
+            border-top: 2px solid #333;
+            margin-top: 10px;
+        }
+
+        .notes-section {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .notes-section label {
+            display: block;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 10px;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .notes-section textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 60px;
+            font-style: italic;
+            color: #666;
+        }
+
+        .signature-section {
+            margin-top: 60px;
+            text-align: right;
+        }
+
+        .signature-line {
+            display: inline-block;
+            min-width: 250px;
+            border-bottom: 2px solid #333;
+            margin-bottom: 10px;
+            padding-bottom: 50px;
+        }
+
+        .signature-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        @media print {
+            @page {
+                margin: 1cm;
+                size: A4;
+            }
+            
+            body {
+                background: white;
+                margin: 0;
+                padding: 0;
+            }
+            .header,
+            .actions,
+            .add-item-btn {
+                display: none;
+            }
+            .container {
+                max-width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            .invoice-wrapper {
+                box-shadow: none;
+                border: none;
+                border-radius: 0;
+                padding: 0;
+                margin: 0;
+                background: white;
+            }
+            .remove-item-btn {
+                display: none;
+            }
+            /* Remove any borders from inputs in print */
+            input, textarea {
+                border: none !important;
+                background: transparent !important;
+                padding: 2px 0 !important;
+                box-shadow: none !important;
+            }
+            /* Clean up payment details for print */
+            .payment-details {
+                border-left: none;
+                background: transparent;
+                padding: 15px 0;
+                box-shadow: none;
+            }
+            /* Ensure table prints cleanly */
+            .items-table {
+                border-collapse: collapse;
+            }
+            /* Remove rounded corners in print */
+            * {
+                border-radius: 0 !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .invoice-wrapper {
+                padding: 30px 20px;
+            }
+            .parties,
+            .invoice-meta-top {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .totals-inner {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Invoice Generator</h1>
+        </div>
+
+        <div class="invoice-wrapper" id="invoice">
+            <div class="invoice-title-section">
+                <div class="invoice-title">Invoice</div>
+                
+                <div class="invoice-meta-top">
+                    <div>
+                        <div class="meta-item">
+                            <label>Invoice ID:</label>
+                            <input type="text" id="invoiceId" placeholder="INV-2025-001">
+                        </div>
+                        <div class="meta-item">
+                            <label>Invoice Date:</label>
+                            <input type="date" id="invoiceDate">
+                        </div>
+                    </div>
+                    <div>
+                        <div class="meta-item">
+                            <label>Due Date:</label>
+                            <input type="date" id="dueDate">
+                        </div>
+                        <div class="meta-item">
+                            <label>Payment Terms:</label>
+                            <input type="text" id="paymentTerms" value="30 days">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="parties">
+                <div class="party">
+                    <div class="party-title">BILLED TO:</div>
+                    <textarea id="billedTo" placeholder="Company Name
+Address Line 1
+Address Line 2
+City, State ZIP
+Country"></textarea>
+                </div>
+
+                <div class="party">
+                    <div class="party-title">PAY TO:</div>
+                    <textarea id="payTo" placeholder="Your Name or Business Name
+Your Address
+City, State ZIP
+Country
+
+Email: your@email.com
+Phone: +62 xxx xxxx xxxx"></textarea>
+                </div>
+            </div>
+
+            <div class="payment-details">
+                <div class="payment-details-title">PAYMENT DETAILS:</div>
+                <div class="payment-field">
+                    <label>Bank:</label>
+                    <input type="text" id="bankName" placeholder="Bank Name">
+                </div>
+                <div class="payment-field">
+                    <label>Account Name:</label>
+                    <input type="text" id="accountName" placeholder="Account Holder Name">
+                </div>
+                <div class="payment-field">
+                    <label>Account Number:</label>
+                    <input type="text" id="accountNumber" placeholder="Account Number">
+                </div>
+            </div>
+
+            <div class="items-section">
+                <table class="items-table" id="itemsTable">
+                    <thead>
+                        <tr>
+                            <th>DESCRIPTION</th>
+                            <th>HOURS</th>
+                            <th>RATE</th>
+                            <th>AMOUNT</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemsBody">
+                        <tr>
+                            <td><input type="text" placeholder="Service description" class="item-description"></td>
+                            <td><input type="number" value="0" min="0" step="0.01" class="hours-input item-hours"></td>
+                            <td><input type="number" value="0" min="0" step="0.01" class="rate-input item-rate"></td>
+                            <td class="total-cell item-total">IDR 0</td>
+                            <td><button class="remove-item-btn" onclick="removeItem(this)">×</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button class="add-item-btn" onclick="addItem()">+ Add Item</button>
+            </div>
+
+            <div class="totals">
+                <div class="totals-inner">
+                    <div class="total-row subtotal">
+                        <span>SUBTOTAL</span>
+                        <span id="subtotal">0,00 IDR</span>
+                    </div>
+                    <div class="total-row grand-total">
+                        <span>TOTAL</span>
+                        <span id="grandTotal">0,00 IDR</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="notes-section">
+                <label>Notes</label>
+                <textarea id="notes" placeholder="Details of work and time entries are attached in separate file"></textarea>
+            </div>
+
+            <div class="signature-section">
+                <div class="signature-line"></div>
+                <div class="signature-name" id="signatureName">Your Name</div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-primary" onclick="window.print()">Print / Save as PDF</button>
+            <button class="btn btn-secondary" onclick="downloadHTML()">Download HTML</button>
+        </div>
+    </div>
+
+    <script>
+        // Set today's date
+        const today = new Date();
+        document.getElementById('invoiceDate').valueAsDate = today;
+
+        // Set due date to 30 days from today
+        const dueDate = new Date();
+        dueDate.setDate(dueDate.getDate() + 30);
+        document.getElementById('dueDate').valueAsDate = dueDate;
+
+        // Format currency for Indonesian Rupiah
+        function formatCurrency(amount) {
+            // Format with Indonesian locale
+            const formatted = parseFloat(amount).toLocaleString('id-ID', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+            return formatted + ' IDR';
+        }
+
+        // Calculate item total
+        function calculateItemTotal(row) {
+            const hours = parseFloat(row.querySelector('.item-hours').value) || 0;
+            const rate = parseFloat(row.querySelector('.item-rate').value) || 0;
+            const total = hours * rate;
+            row.querySelector('.item-total').textContent = formatCurrency(total);
+            calculateTotals();
+        }
+
+        // Calculate all totals
+        function calculateTotals() {
+            const rows = document.querySelectorAll('#itemsBody tr');
+            let subtotal = 0;
+
+            rows.forEach(row => {
+                const hours = parseFloat(row.querySelector('.item-hours').value) || 0;
+                const rate = parseFloat(row.querySelector('.item-rate').value) || 0;
+                subtotal += hours * rate;
+            });
+
+            document.getElementById('subtotal').textContent = formatCurrency(subtotal);
+            document.getElementById('grandTotal').textContent = formatCurrency(subtotal);
+        }
+
+        // Add new item row
+        function addItem() {
+            const tbody = document.getElementById('itemsBody');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td><input type="text" placeholder="Service description" class="item-description"></td>
+                <td><input type="number" value="0" min="0" step="0.01" class="hours-input item-hours"></td>
+                <td><input type="number" value="0" min="0" step="0.01" class="rate-input item-rate"></td>
+                <td class="total-cell item-total">IDR 0</td>
+                <td><button class="remove-item-btn" onclick="removeItem(this)">×</button></td>
+            `;
+            tbody.appendChild(newRow);
+            attachEventListeners(newRow);
+        }
+
+        // Remove item row
+        function removeItem(button) {
+            const rows = document.querySelectorAll('#itemsBody tr');
+            if (rows.length > 1) {
+                button.closest('tr').remove();
+                calculateTotals();
+            } else {
+                alert('You must have at least one item row.');
+            }
+        }
+
+        // Attach event listeners to row
+        function attachEventListeners(row) {
+            row.querySelector('.item-hours').addEventListener('input', () => calculateItemTotal(row));
+            row.querySelector('.item-rate').addEventListener('input', () => calculateItemTotal(row));
+        }
+
+        // Update signature name when Pay To changes
+        document.getElementById('payTo').addEventListener('input', function() {
+            const firstLine = this.value.split('\n')[0];
+            if (firstLine.trim()) {
+                document.getElementById('signatureName').textContent = firstLine.trim();
+            }
+        });
+
+        // Download as HTML
+        function downloadHTML() {
+            const invoiceContent = document.getElementById('invoice').outerHTML;
+            const fullHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+    <style>
+        ${document.querySelector('style').innerHTML}
+    </style>
+</head>
+<body>
+    <div class="container">
+        ${invoiceContent}
+    </div>
+</body>
+</html>`;
+
+            const blob = new Blob([fullHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'invoice-' + (document.getElementById('invoiceId').value || 'draft') + '.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Initialize event listeners on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const rows = document.querySelectorAll('#itemsBody tr');
+            rows.forEach(row => attachEventListeners(row));
+        });
+    </script>
+</body>
+</html>
